@@ -1,0 +1,34 @@
+{
+  "name": "express-task-manager__node",
+  "version": "1.0.0",
+  "description": "A task manager built with Node.js and Express",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsc && node dist/index.js",
+    "dev": "nodemon --watch src --ext ts --exec \"node --loader ts-node/esm src/index.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mamadfar/express-task-manager__node.git"
+  },
+  "keywords": [],
+  "author": "Mohammad Farhadi",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/mamadfar/express-task-manager__node/issues"
+  },
+  "homepage": "https://github.com/mamadfar/express-task-manager__node#readme",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.1.0",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
