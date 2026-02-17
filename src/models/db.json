@@ -2,6 +2,11 @@
     {
         "id": 1,
         "title": "Learn Node.js",
+        "completed": true
+    },
+    {
+        "id": 2,
+        "title": "Learn CSS",
         "completed": false
     }
 ]

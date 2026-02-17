@@ -5,124 +5,159 @@ import DB from "../models/db.js";
 import { rootPath } from "../index.js";
 
 export default class TasksController {
-  static getTasksController(req: Request, res: Response) {
+  static getTasks(req: Request, res: Response) {
     try {
       const tasks = Task.getAllTasks();
       res.json({
         success: true,
-        body: tasks
+        body: tasks,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Internal Server Error: " + (error as any).message
+        message: "Internal Server Error",
       });
     }
   }
 
-  static getTaskByIdController(req: Request, res: Response) {
+  static getTaskById(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
       const task = Task.getTaskById(id);
       if (task) {
         res.json({
           success: true,
-          body: task
-        })
+          body: task,
+        });
       } else {
         res.status(404).json({
           success: false,
-          message: "Not Found: Task with the specified ID was not found."
+          message: "Not Found: Task with the specified ID was not found.",
         });
       }
-      
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Internal Server Error: " + (error as any).message
+        message: "Internal Server Error",
       });
     }
   }
-  static addTaskController(req: Request, res: Response) {
+
+  static createTask(req: Request, res: Response) {
+    //? Always check the required fields in the request body before processing the request
     if (req.body.title) {
       const title = req.body.title;
-      const completed = req.body.completed === "on";
+      const completed = !!req.body.completed;
+
+      if (typeof title !== "string" || title.length < 3) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message:
+              "Invalid Request: Title must be a string with at least 3 characters.",
+          });
+      } else if (Task.getTaskByTitle(title)) {
+        return res
+          .status(409)
+          .json({
+            success: false,
+            message:
+              "Invalid Request: A task with the same title already exists.",
+          });
+      }
 
       try {
         const task = new Task(title, completed);
         task.save();
-        res.json({ success: true, body: task });
+        res.status(201).json({ success: true, body: task });
       } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } else {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Invalid Request: Title is required.",
+        });
+    }
+  }
+
+  static updateTask(req: Request, res: Response) {
+    if (req.body.title && req.body.completed !== undefined) {
+      const {title, completed} = req.body;
+
+      if (title.length < 3) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Request: Title must be at least 3 characters long.",
+        })
+      }
+
+      let task = Task.getTaskByTitle(title);
+      if (task && task.id !== Number(req.params.id)) {
+        return res.status(409).json({
+          success: false,
+          message: "Invalid Request: A task with the same title already exists.",
+        });
+      } 
+      
+      task = Task.getTaskById(Number(req.params.id));
+      if (task) {
+        try {
+          task.title = title;
+          task.completed = completed;
+          task.save();
+          res.json({ success: true, body: task });
+        } catch (error) {
+          res
+            .status(500)
+            .json({
+              success: false,
+              message: "Internal Server Error",
+            });
+        }
+      } else {
         res
-          .status(400)
+          .status(404)
           .json({
             success: false,
-            message: `Invalid Request: ${(error as any).message}`,
+            message: "Not Found: Task with the specified ID was not found.",
           });
       }
     } else {
       res
         .status(400)
-        .json({ success: false, message: "Invalid Request: Title is required." });
+        .json({
+          success: false,
+          message: "Invalid Request: Task title and completed status are required.",
+        });
     }
   }
-  
-  static toggleTaskController(req: Request, res: Response) {
-    if (req.body.id) {
-        const task = Task.getTaskById(Number(req.body.id));
-    
-        if (task) {
-          task.completed = !task.completed;
-          task.save();
-          res.json({ success: true, body: task });
-        } else {
-          res
-            .status(404)
-            .json({ success: false, message: "Not Found: Task with the specified ID was not found." });
-        }
-      } else {
-        res
-          .status(400)
-          .json({ success: false, message: "Invalid Request: Task ID is required." });
-      }
-  }
 
-  static editTaskController(req: Request, res: Response) {
-    if (req.body.id && req.body.title) {
-        const task = Task.getTaskById(Number(req.body.id));
-        if (task) {
-          try {
-            task.title = req.body.title;
-            task.save();
-            res.json({ success: true, body: task });
-          } catch (error) {
-            res.status(400).json({ success: false, message: "Invalid Request: " + (error as any).message });
-          }
-        } else {
-          res
-            .status(404)
-            .json({ success: false, message: "Not Found: Task with the specified ID was not found." });
-        }
-      } else {
-        res.status(400).json({ success: false, message: "Invalid Request: Task ID and Title are required." });
-      }
-  }
-
-  static deleteTaskController(req: Request, res: Response) {
-    if (req.body.id) {
+  static deleteTask(req: Request, res: Response) {
       try {
-        if (DB.deleteTaskById(Number(req.body.id))) {
+        if (DB.deleteTaskById(Number(req.params.id))) {
           res.json({ success: true });
         } else {
           res
             .status(404)
-            .json({ success: false, message: "Not Found: Task with the specified ID was not found." });
+            .json({
+              success: false,
+              message: "Not Found: Task with the specified ID was not found.",
+            });
         }
       } catch (error) {
-        res.status(500).json({ success: false, message: "Internal Server Error: " + (error as any).message });
+        res
+          .status(500)
+          .json({
+            success: false,
+            message: "Internal Server Error",
+          });
       }
-  } else {
-    res.status(400).json({ success: false, message: "Invalid Request: Task ID is required." });
-  }
   }
 }

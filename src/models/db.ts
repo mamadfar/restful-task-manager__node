@@ -58,7 +58,7 @@ export default class DB {
             throw new Error("Syntax error. \nPlease check the DB file.", error as any);
         }
     }
-        static getTaskByTitle(title: string): ITask | false {
+    static getTaskByTitle(title: string): ITask | false {
         let data;
         if (this.DBExists()) {
             data = fs.readFileSync(filename, 'utf-8');
