@@ -91,4 +91,15 @@ export default class Task {
             return t;
         })
     }
+
+    //? toJSON method is used when we want to convert the Task instance to a JSON object, for example when sending a response in an API.
+    //? By defining this method, we can control how the Task instance is represented in JSON format,
+    //? and we can exclude any private properties or methods that we don't want to expose in the API response.
+    toJSON() {
+        return {
+            id: this.#id,
+            title: this.#title,
+            completed: this.#completed
+        }
+    }
 }
