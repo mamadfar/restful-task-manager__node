@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 
 import Task from "../models/task.js";
 import DB from "../models/db.js";
-import { rootPath } from "../index.js";
 
 export default class TasksController {
   static getTasks(req: Request, res: Response) {

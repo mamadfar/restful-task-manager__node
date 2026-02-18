@@ -4,18 +4,28 @@ import {fileURLToPath} from 'url'
 import express from 'express'
 import 'dotenv/config'
 
-import HomeRoute from './routes/home.route.js'
+// import HomeRoute from './routes/home.route.js'
 import TasksRoute from './routes/tasks.route.js'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+// const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const app = express()
 
-app.use(express.static(path.join(__dirname, '..', 'public')))
+// app.use(express.static(path.join(__dirname, '..', 'public')))
 // app.use(express.urlencoded({extended: false})); //? to parse form data - usually used in HTML form submissions
 app.use(express.json()); //? to parse JSON data - usually used in API requests
 
-app.use(HomeRoute)
+app.use((req, res, next) => {
+  //! CORS (Cross-Origin Resource Sharing) headers
+  res.setHeader('Access-Control-Allow-Origin', '*'); //? Allow requests from any origin (Host)
+  //! For preflight requests (OPTIONS), you can also specify allowed methods and headers
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); //? Allow specific HTTP methods
+  //! By default Content-Type (application/json) is not allowed, so we need to allow it explicitly
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); //? Allow specific headers
+  next();
+})
+
+// app.use(HomeRoute)
 app.use(TasksRoute)
 
 app.use('/', (req, res) => {
@@ -26,7 +36,7 @@ app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`)
 })
 
-export {__dirname as rootPath}
+// export {__dirname as rootPath}
 
 
 

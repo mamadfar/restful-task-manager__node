@@ -2,6 +2,8 @@ const tasksList = document.getElementById("tasks-list");
 const taskForm = document.getElementById("task-form");
 const message = document.getElementById("message");
 
+axios.defaults.baseURL = "http://localhost:3000";
+
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const { data } = await axios.get("/tasks");
@@ -85,6 +87,7 @@ taskForm.addEventListener("submit", async (event) => {
 });
 
 tasksList.addEventListener("click", async (event) => {
+  event.preventDefault();
   const target = event.target;
   const label = target.parentElement.querySelector("label");
   const titleText = label.textContent;
