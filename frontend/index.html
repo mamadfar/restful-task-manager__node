@@ -49,10 +49,59 @@
       </div>
 
       <div class="row mb-4">
-        <div class="col">
-          <ul class="list-group lh-lg d-none" id="tasks-list">
-          </ul>
-          <h2 class="text-center d-none" id="message">No tasks yet. Please add some tasks.</h2>
+        <div class="col-12">
+          <div class="mb-2 d-flex align-items-center">
+            <label class="me-3">Status: </label>
+            <input
+              type="radio"
+              name="status"
+              class="form-check-input"
+              value=""
+              id="all"
+              checked
+            />
+            <label for="all" class="me-4 ps-2 user-select-none">All</label>
+            <input
+              type="radio"
+              name="status"
+              class="form-check-input"
+              value="true"
+              id="completed"
+            />
+            <label for="completed" class="me-4 ps-2 user-select-none"
+              >Completed</label
+            >
+            <input
+              type="radio"
+              name="status"
+              class="form-check-input"
+              value="false"
+              id="in-progress"
+            />
+            <label for="in-progress" class="me-4 ps-2 user-select-none"
+              >In progress</label
+            >
+          </div>
+        </div>
+        <div class="col-12">
+          <ul class="list-group lh-lg d-none" id="tasks-list"></ul>
+          <h2 class="text-center d-none" id="message">
+            No tasks yet. Please add some tasks.
+          </h2>
+        </div>
+        <div class="col-12">
+          <div
+            id="pagination"
+            class="justify-content-center align-items-center d-flex mt-4 d-none"
+          >
+            <button id="prev-button" class="btn btn-primary">
+              &leftarrow;
+            </button>
+            <label id="page-label" class="mx-3">Page 1 of 1</label>
+            <button id="next-button" class="btn btn-primary">
+              &rightarrow;
+            </button>
+          </div>
         </div>
       </div>
     </div>

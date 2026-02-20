@@ -1,12 +1,28 @@
 const tasksList = document.getElementById("tasks-list");
 const taskForm = document.getElementById("task-form");
 const message = document.getElementById("message");
+const statusInputs = document.querySelectorAll("input[name='status']");
+const nextBtn = document.getElementById("next-button");
+const prevBtn = document.getElementById("prev-button");
+const pageLabel = document.getElementById("page-label");
+const pagination = document.getElementById("pagination");
 
 axios.defaults.baseURL = "http://localhost:3000";
 
-document.addEventListener("DOMContentLoaded", async () => {
+const limit = 3;
+let currentPage = 1;
+let finished = undefined;
+let totalTasks, totalPages;
+
+const loadTasks = async () => {
   try {
-    const { data } = await axios.get("/tasks");
+    const { data } = await axios.get("/tasks", {
+      params: {
+        page: currentPage,
+        limit,
+        finished,
+      },
+    });
     if (data.success) {
       if (data.body.length) {
         tasksList.classList.remove("d-none");
@@ -38,12 +54,43 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else {
         message.classList.remove("d-none");
       }
+      if (data.pagination.totalTasks > limit) {
+        pagination.classList.remove("d-none");
+        pageLabel.textContent = `Page ${currentPage} of ${data.pagination.totalPages}`;
+        prevBtn.disabled = nextBtn.disabled = false;
+        console.log(currentPage)
+        if (currentPage === 1) {
+          prevBtn.disabled = true;
+        } else if (currentPage === data.pagination.totalPages) {
+          nextBtn.disabled = true;
+        } else {
+          prevBtn.disabled = false;
+        }
+      } else {
+        pagination.classList.add("d-none");
+      }
     } else {
       alert(data.message);
     }
   } catch (error) {
     alert(error.response.data.message);
   }
+}
+
+nextBtn.addEventListener("click", () => {
+  currentPage++;
+  loadTasks();
+})
+
+prevBtn.addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    loadTasks();
+  }
+})
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadTasks();
 });
 
 taskForm.addEventListener("submit", async (event) => {

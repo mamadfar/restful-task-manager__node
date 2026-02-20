@@ -15,12 +15,12 @@ export default class TasksController {
           : undefined;
     const search = req.query.search ? String(req.query.search) : "";
     try {
-      let tasks = Task.getAllTasks();
-      tasks = tasks.filter((task) =>
+      const tasks = Task.getAllTasks();
+      let filteredTasks = [...tasks].filter((task) =>
         task.title.toLowerCase().includes(search.toLowerCase()),
       );
       if (finished !== undefined) {
-        tasks = tasks.filter((task) => task.completed === finished);
+        filteredTasks = filteredTasks.filter((task) => task.completed === finished);
       }
 
       //! Pagination logic should be applied after filtering the tasks based on the search
@@ -28,7 +28,8 @@ export default class TasksController {
       const start = (page - 1) * limit;
       const end = start + limit;
       const totalPages = Math.ceil(tasks.length / limit);
-      tasks = tasks.slice(start, end);
+      const totalTasks = tasks.length;
+      filteredTasks = filteredTasks.slice(start, end);
 
       res.json({
         success: true,
@@ -36,9 +37,9 @@ export default class TasksController {
           page,
           limit,
           totalPages,
-          totalItems: tasks.length,
+          totalTasks,
         },
-        body: tasks,
+        body: filteredTasks,
       });
     } catch (error) {
       res.status(500).json({
