@@ -27,8 +27,8 @@ export default class TasksController {
       //! and finished query parameters to ensure that the pagination reflects the filtered results correctly.
       const start = (page - 1) * limit;
       const end = start + limit;
-      const totalPages = Math.ceil(tasks.length / limit);
-      const totalTasks = tasks.length;
+      const totalPages = Math.ceil(filteredTasks.length / limit);
+      const totalTasks = filteredTasks.length;
       filteredTasks = filteredTasks.slice(start, end);
 
       res.json({

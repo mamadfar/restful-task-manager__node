@@ -1,13 +1,15 @@
 const tasksList = document.getElementById("tasks-list");
 const taskForm = document.getElementById("task-form");
 const message = document.getElementById("message");
-const statusInputs = document.querySelectorAll("input[name='status']");
+const allStatusInput = document.getElementById("all");
+const completedStatusInput = document.getElementById("completed");
+const inProgressStatusInput = document.getElementById("in-progress");
 const nextBtn = document.getElementById("next-button");
 const prevBtn = document.getElementById("prev-button");
 const pageLabel = document.getElementById("page-label");
 const pagination = document.getElementById("pagination");
 
-axios.defaults.baseURL = "http://localhost:3000";
+axios.defaults.baseURL = "http://localhost:3000/api/v1";
 
 const limit = 3;
 let currentPage = 1;
@@ -24,8 +26,11 @@ const loadTasks = async () => {
       },
     });
     if (data.success) {
+        totalTasks = data.pagination.totalTasks;
+        totalPages = data.pagination.totalPages;
       if (data.body.length) {
         tasksList.classList.remove("d-none");
+        message.classList.add("d-none");
         let str = "";
         for (const task of data.body) {
           str += `
@@ -53,15 +58,16 @@ const loadTasks = async () => {
         tasksList.innerHTML = str;
       } else {
         message.classList.remove("d-none");
+        tasksList.classList.add("d-none");
+        tasksList.innerHTML = "";
       }
-      if (data.pagination.totalTasks > limit) {
+      if (totalTasks > limit) {
         pagination.classList.remove("d-none");
-        pageLabel.textContent = `Page ${currentPage} of ${data.pagination.totalPages}`;
+        pageLabel.textContent = `Page ${currentPage} of ${totalPages}`;
         prevBtn.disabled = nextBtn.disabled = false;
-        console.log(currentPage)
         if (currentPage === 1) {
           prevBtn.disabled = true;
-        } else if (currentPage === data.pagination.totalPages) {
+        } else if (currentPage === totalPages) {
           nextBtn.disabled = true;
         } else {
           prevBtn.disabled = false;
@@ -89,7 +95,26 @@ prevBtn.addEventListener("click", () => {
   }
 })
 
+allStatusInput.addEventListener("change", () => {
+  finished = undefined;
+  currentPage = 1;
+  loadTasks();
+});
+
+completedStatusInput.addEventListener("change", () => {
+  finished = true;
+  currentPage = 1;
+  loadTasks();
+});
+
+inProgressStatusInput.addEventListener("change", () => {
+  finished = false;
+  currentPage = 1;
+  loadTasks();
+});
+
 document.addEventListener("DOMContentLoaded", () => {
+  allStatusInput.checked = true;
   loadTasks();
 });
 
@@ -107,23 +132,14 @@ taskForm.addEventListener("submit", async (event) => {
   try {
     const {data} = await axios.post("/tasks", { title, completed });
     if (data.success) {
-      message.classList.add("d-none");
-      tasksList.classList.remove("d-none");
-      const id = data.body.id;
-      tasksList.innerHTML += `
-        <li
-            class="list-group-item d-flex bg-light"
-            data-id="${id}"
-        >
-        <div class="flex-grow-1 d-flex align-items-center">
-          <label class="form-check-label user-select-none">${title}</label>
-          <span class="badge ${completed ? "bg-success" : "bg-secondary"} ms-auto me-3 user-select-none">${completed ? "Completed" : "In progress"}</span>
-        </div>
-          <button class="btn btn-sm me-3 ${completed ? "btn-secondary" : "btn-success"} toggle-btn">Toggle</button>
-          <button class="btn btn-sm me-3 btn-primary edit-btn">Edit</button>
-          <button class="btn btn-sm btn-danger delete-btn">Delete</button>
-        </li>
-      `;
+      if (totalTasks === 0) {
+        currentPage = 1;
+      } else if (totalTasks % limit) {
+        currentPage = totalPages;
+      } else {
+        currentPage = totalPages + 1;
+      }
+      loadTasks();
       taskForm.reset();
     } else {
       alert(data.message);
@@ -197,11 +213,10 @@ tasksList.addEventListener("click", async (event) => {
       try {
         const {data} = await axios.delete(`/tasks/${id}`);
         if (data.success) {
-          target.parentElement.remove();
-          if (!tasksList.children.length) {
-            tasksList.classList.add("d-none");
-            message.classList.remove("d-none");
+          if (tasksList.children.length === 1 && currentPage > 1) {
+            currentPage--;
           }
+          loadTasks();
         } else {
           alert(data.message);
         }

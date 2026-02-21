@@ -8,6 +8,7 @@ import 'dotenv/config'
 import TasksRoute from './routes/tasks.route.js'
 
 // const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const VERSION = process.env.VERSION || 'v1'
 
 const app = express()
 
@@ -26,7 +27,7 @@ app.use((req, res, next) => {
 })
 
 // app.use(HomeRoute)
-app.use(TasksRoute)
+app.use(`/api/${VERSION}/`, TasksRoute)
 
 app.use('/', (req, res) => {
     res.status(404).send('<h1>404 Not Found</h1><br/><p>The requested resource was not found on this server.</p>')
